@@ -12,7 +12,7 @@ Run python file with environment: `poetry run python path/to/file.py`
 Enter environment shell: `poetry shell`  
 
 ### API Key
-The API Key will be stored in a specified file and developers need to enter their own key there.  
+Developers need to add their API Key in lao_tracker/RIOT_API_KEY in plain text.  
 For tests and deployment there might be a key stored in github secrets.  
 
 ## Deployment
