@@ -26,10 +26,10 @@ jobs:
       - uses: actions/checkout@v2      
         
       - name: Add Riot API Key
-        run: ${{ secrets.RIOT_API_KEY }} > ./src/lao_tracker/RIOT_API_KEY.txt
+        run: echo ${{ secrets.RIOT_API_KEY }} > ./src/lao_tracker/RIOT_API_KEY.txt
         
       - name: Add ssh-fingerprint to trusted fingerprints
-        run: ${{ secrets.SSH_FINGERPRINT }} >> ~/.ssh/known_hosts
+        run: echo ${{ secrets.SSH_FINGERPRINT }} >> ~/.ssh/known_hosts
 
       - name: Copy Files
         run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp -r src/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }}:"~/bin/lao_tracker_src/"
