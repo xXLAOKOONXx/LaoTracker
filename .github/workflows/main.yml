@@ -29,7 +29,8 @@ jobs:
         run: echo ${{ secrets.RIOT_API_KEY }} > ./src/lao_tracker/RIOT_API_KEY.txt
         
       - name: Add ssh-fingerprint to trusted fingerprints
-        run: echo ${{ secrets.SSH_FINGERPRINT }} >> ./.ssh/known_hosts
+        # run: echo ${{ secrets.SSH_FINGERPRINT }} >> ./.ssh/known_hosts
+        run: ls
 
       - name: Copy Files
         run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp -r src/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }}:"~/bin/lao_tracker_src/"
