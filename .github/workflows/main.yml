@@ -39,7 +39,7 @@ jobs:
 #         run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" -v scp -vvv -o UserKnownHostsFile=~/known_hosts -r src/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }}:"~/bin/lao_tracker_src/"
 
       - name: Copy Files
-        run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" -v rsync -v -o UserKnownHostsFile=~/known_hosts -r src/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }}:"~/bin/lao_tracker_src/"
+        run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" -v rsync -e 'ssh -o UserKnownHostsFile=~/known_hosts -p 22' -v -r src/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }}:"~/bin/lao_tracker_src/"
       
       - name: Start Gunicorn
         run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }} "cd bin/lao_tracker_src && bash scripts/run_gunicorn.sh"
