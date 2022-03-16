@@ -22,6 +22,10 @@ app.layout = html.Div(children=[
     '''),
 
     html.Div(children=get_text()),
+
+    html.Div(children='''
+        Here will be even more content soon...
+    '''),
 ])
 
 server = app.server
