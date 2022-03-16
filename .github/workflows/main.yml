@@ -30,7 +30,10 @@ jobs:
         
         # This might not work :(
       - name: Add ssh-fingerprint to trusted fingerprints
-        run: sudo echo ${{ secrets.SSH_FINGERPRINT }} >> ~/known_hosts
+        run: sudo echo ${{ secrets.SSH_FINGERPRINT }} >> ~/known_hosts | cat ~/known_hosts
+        
+      - name: test stf
+        run: ssh-keyscan -H [hostname] >> ~/known_hosts | cat ~/known_hosts
 
       - name: Copy Files
         run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" -v scp -vvv -o UserKnownHostsFile=~/known_hosts -r src/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }}:"~/bin/lao_tracker_src/"
