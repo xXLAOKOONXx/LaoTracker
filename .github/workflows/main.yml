@@ -32,7 +32,7 @@ jobs:
         run: echo ${{ secrets.SSH_FINGERPRINT }} >> known_hosts
 
       - name: Copy Files
-        run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp -o UserKnownHostsFile=known_hosts -r src/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }}:"~/bin/lao_tracker_src/"
+        run: sshpass -p "${{ secrets.SERVER_PASSWORD }}"  -o UserKnownHostsFile=known_hosts scp -r src/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }}:"~/bin/lao_tracker_src/"
       
       - name: Start Gunicorn
         run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }} "cd bin/lao_tracker_src && bash scripts/run_gunicorn.sh"
