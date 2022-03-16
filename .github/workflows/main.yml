@@ -32,7 +32,11 @@ jobs:
         # run: echo ${{ secrets.SSH_FINGERPRINT }} >> ./.ssh/known_hosts
         run: ls
       - name: test folder structure
-        run: cd ~ |
+        run: cd .. |
+          ls |
+          cd .. |
+          ls |
+          cd .. |
           ls
 
       - name: Copy Files
