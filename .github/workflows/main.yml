@@ -28,11 +28,12 @@ jobs:
       - name: Add Riot API Key
         run: echo ${{ secrets.RIOT_API_KEY }} > ./src/lao_tracker/RIOT_API_KEY.txt
         
+        # This might not work :(
       - name: Add ssh-fingerprint to trusted fingerprints
-        run: sudo echo ${{ secrets.SSH_FINGERPRINT }} >> /etc/ssh/ssh_known_hosts
+        run: sudo echo ${{ secrets.SSH_FINGERPRINT }} >> ~/known_hosts
 
       - name: Copy Files
-        run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" -v scp -vvv -r src/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }}:"~/bin/lao_tracker_src/"
+        run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" -v scp -vvv -o UserKnownHostsFile=~/known_hosts -r src/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }}:"~/bin/lao_tracker_src/"
       
       - name: Start Gunicorn
         run: sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_URL }} "cd bin/lao_tracker_src && bash scripts/run_gunicorn.sh"
