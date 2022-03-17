@@ -1,7 +1,7 @@
 # project specifics
 
 # RIOT API
-RIOT_API_KEY.txt
+src/lao_tracker/RIOT_API_KEY.txt
 
 # Ignore local cassiopeia data
 src/data/
