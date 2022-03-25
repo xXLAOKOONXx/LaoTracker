@@ -105,6 +105,20 @@ diskcache = ["diskcache (>=5.2.1)", "multiprocess (>=0.70.12)", "psutil (>=5.8.0
 testing = ["beautifulsoup4 (>=4.8.2)", "lxml (>=4.6.2)", "percy (>=2.0.2)", "pytest (>=6.0.2)", "requests[security] (>=2.21.0)", "selenium (>=3.141.0)", "waitress (>=1.4.4)", "cryptography (<3.4)"]
 
 [[package]]
+name = "dash-bootstrap-components"
+version = "1.0.3"
+description = "Bootstrap themed components for use in Plotly Dash"
+category = "main"
+optional = false
+python-versions = ">=3.6, <4"
+
+[package.dependencies]
+dash = ">=2.0.0"
+
+[package.extras]
+pandas = ["numpy", "pandas"]
+
+[[package]]
 name = "dash-core-components"
 version = "2.0.0"
 description = "Core component suite for Dash"
@@ -338,6 +352,20 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
 
 [[package]]
+name = "riotwatcher"
+version = "3.2.0"
+description = "RiotWatcher is a thin wrapper on top of the Riot Games API for League of Legends."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+requests = "*"
+
+[package.extras]
+dev = ["coverage", "pre-commit", "pytest", "pytest-cov", "tox"]
+
+[[package]]
 name = "simplekv"
 version = "0.14.1"
 description = "A key-value storage for binary data, support many backends."
@@ -391,7 +419,7 @@ watchdog = ["watchdog"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "0abc8fdc854570867348febf98a24d7b433ba8ef3d058cbb53b5cedc7266b291"
+content-hash = "20d17d827abeebf62dd7b94eb398f86c6c5316b980fbf45c92f4bcc991dcdfc9"
 
 [metadata.files]
 arrow = [
@@ -487,6 +515,10 @@ colorama = [
 dash = [
     {file = "dash-2.3.0-py3-none-any.whl", hash = "sha256:1a25ff4bc0602231034f9fc632ed0c5effee9971e610c40236bec54831de6ee2"},
     {file = "dash-2.3.0.tar.gz", hash = "sha256:bdfd227303f487f821ad10bc011ba6a88ccf397402f3b0fb4f0a66047cafad10"},
+]
+dash-bootstrap-components = [
+    {file = "dash-bootstrap-components-1.0.3.tar.gz", hash = "sha256:d054aed4a162526810a86d80b8682ba2f2047d54baf12a6a28b4fddf45043243"},
+    {file = "dash_bootstrap_components-1.0.3-py3-none-any.whl", hash = "sha256:409e9db7c5013c7f3ce94dc91a00639623191d1f0835be7cbb204228625a452c"},
 ]
 dash-core-components = [
     {file = "dash_core_components-2.0.0-py3-none-any.whl", hash = "sha256:52b8e8cce13b18d0802ee3acbc5e888cb1248a04968f962d63d070400af2e346"},
@@ -674,6 +706,10 @@ pytz = [
 requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
     {file = "requests-2.27.1.tar.gz", hash = "sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61"},
+]
+riotwatcher = [
+    {file = "riotwatcher-3.2.0-py3-none-any.whl", hash = "sha256:91ea0a14bd75ef9c3dffe563238510baacb9e5a9e113cd0003d38099dca6a172"},
+    {file = "riotwatcher-3.2.0.tar.gz", hash = "sha256:c6f26bf582a0995723307053a2d26a7e3e0c2e8e2cee26123532aa6255f41f0d"},
 ]
 simplekv = [
     {file = "simplekv-0.14.1-py2-none-any.whl", hash = "sha256:af91a50af41a286a8b7b93292b21dd1af37f38e9513fea0eb4fa75ce778c1683"},

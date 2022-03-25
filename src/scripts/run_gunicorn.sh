@@ -10,4 +10,4 @@ poetry install
 pkill gunicorn
 
 # Start the app on port 80
-poetry run gunicorn lao_tracker.app:server -b :80
+poetry run gunicorn dash_app.app:server -b :80

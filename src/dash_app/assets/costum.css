@@ -1,0 +1,10 @@
+body {
+    background-image : url(/assets/Thresh_0.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-color: black;
+}
+
+h1 {
+    color: #98ee99;
+}
