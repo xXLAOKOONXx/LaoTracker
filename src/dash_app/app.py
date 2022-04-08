@@ -1,3 +1,4 @@
+from ctypes import wintypes
 from dash import Dash, html, dcc, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
 import cassiopeia as cass
@@ -26,13 +27,43 @@ def draw_df():
     return df
 
 def tiny_timedelta(timedelta):
-    dumb = datetime.timedelta(1)
-    dumb.total_seconds()
-    r = str(int(timedelta.total_seconds() / 60))+':'+str(int(timedelta.total_seconds() % 60))
+    minutes = str(int(timedelta.total_seconds() / 60))
+    if len(minutes) == 1:
+        minutes = '0' + minutes
+    seconds = str(int(timedelta.total_seconds() % 60))
+    if len(seconds) == 1:
+        seconds = '0' + seconds
+    r = minutes + ':' + seconds
+    return r
+
+def two_space(input):
+    input = str(input)
+    if len(input) == 2:
+        return input
+    if len(input) == 1:
+        return ' ' + input    
+    return input
+
+def calculate_average(enumerable_timedeltas):
+    total = 0
+    total_time = 0
+    for _, i in enumerate(enumerable_timedeltas):
+        total = total + 1
+        total_time = total_time + i.total_seconds()/1E3
+    mean_time = int(total_time / total)
+    minutes = str(int(mean_time / 60))
+    if len(minutes) == 1:
+        minutes = '0' + minutes
+    seconds = str(int(mean_time % 60))
+    if len(seconds) == 1:
+        seconds = '0' + seconds
+    r = minutes + ':' + seconds
     return r
 
 
 app.layout = html.Div(children=[
+    html.Video(id='bgVideo',src='/assets/animated-thresh.webm',
+								autoPlay='autoPlay',loop='loop',muted='muted'),
     html.H1(children='Welcome lonely SOUL', style={'margin':'1rem'}),
 
     dbc.Card('Here will be more content in the future', style={'width':'fit-content', 'margin':'1rem', 'padding':'0.5rem'}),
@@ -76,8 +107,8 @@ def refresh_data(n_clicks):
         'Average Deaths': df['deaths'].mean(),
         'Percentage Thresh played':thresh_picked * 100 / row_count,
         'Percentage First Bloods':first_bloods * 100 / row_count,
-        'Average Tier 2 Upgrade':str(df['tier2Upgrade'].mean()),
-        'Average Tier 3 Upgrade':str(df['tier3Upgrade'].mean()),
+        'Average Tier 2 Upgrade':calculate_average(df['tier2Upgrade']),
+        'Average Tier 3 Upgrade':calculate_average(df['tier3Upgrade']),
 
     }, index=['value'])
 
@@ -92,30 +123,53 @@ def refresh_data(n_clicks):
     childs = []
     for i, row in recent_ten_games_df.iterrows():
 
-        tier2_color = 'danger'
+        tier2_class = 'goal-failed'
         if row["tier2Upgrade"].total_seconds() < 600:
-            tier2_color = 'success'
-        thresh_color = 'success'
+            tier2_class = 'goal-met'
+        thresh_class = 'goal-met'
         thresh_text = 'Thresh Game'
         if not row["threshPicked"]:
-            thresh_color = 'danger'
-            thresh_text = 'Thresh open but not picked'
+            thresh_class = 'goal-failed'
+            thresh_text = 'Thresh not picked'
             if not row['support']:
                 thresh_text = 'No Support Game'
             elif row['threshBan']:
                 thresh_text = 'Thresh was banned'
-                thresh_color = 'warning'
+                thresh_class = 'goal-almost-met'
             elif row['threshPickedByOther']:
                 thresh_text = 'Enemy picked Thresh'
-                thresh_color = 'warning'
+                thresh_class = 'goal-almost-met'
+
+        win_text = 'WIN'
+        win_class = 'goal-met'
+        if not row['win']:
+            win_text = 'LOOSE'
+            win_class = 'goal-failed'
+
+        red_trinket_text = f'Update to Red Trinket: {tiny_timedelta(row["redTrinketPurchase"])}'
+        red_trinket_class = 'goal-met'
+        if row['redTrinketPurchase'].total_seconds() > row["tier2Upgrade"].total_seconds() + 60:
+            red_trinket_class = 'goal-almost-met'
+        if row['redTrinketPurchase'].total_seconds() > row["tier2Upgrade"].total_seconds() + 120:
+            red_trinket_class = 'goal-failed'
+
+        kda_class = 'goal-met'
+        if row["deaths"] > 4:
+            kda_class = 'goal-almost-met'
+        if row["deaths"] > 6:
+            kda_class = 'goal-failed'
+
 
         c = dbc.Card(
             dbc.ListGroup(
                 [
-                    dbc.ListGroupItem(thresh_text, color=thresh_color, style={'width':'15rem'}),
-                    dbc.ListGroupItem(f'Played at { str(row["timestamp"])}', style={'width':'20rem'}, color='dark'),
-                    dbc.ListGroupItem(f'KDA: {row["kills"]}/{row["deaths"]}/{row["assists"]}', style={'width':'10rem'}),
-                    dbc.ListGroupItem(f'Supportitem got wards at {tiny_timedelta(row["tier2Upgrade"])}', style={'width':'20rem'}, color=tier2_color),
+                    dbc.ListGroupItem(win_text, class_name=win_class, style={'width':'5rem'}),
+                    dbc.ListGroupItem(thresh_text, class_name=thresh_class, style={'width':'11rem'}),
+                    dbc.ListGroupItem(f'Played at { str(row["timestamp"])}', style={'width':'16rem'}, class_name='standard-item'),
+                    dbc.ListGroupItem(f'KDA: {two_space(row["kills"])}/{two_space(row["deaths"])}/{two_space(row["assists"])}', style={'width':'10rem'}, class_name=kda_class),
+                    dbc.ListGroupItem(f'Supportitem got wards at {tiny_timedelta(row["tier2Upgrade"])}', style={'width':'16rem'}, class_name=tier2_class),
+                    dbc.ListGroupItem(red_trinket_text, style={'width':'15rem'}, class_name=red_trinket_class),
+                    dbc.ListGroupItem(f'Gameduration: {tiny_timedelta(row["gametime"])}', style={'width':'12rem'}, class_name='standard-item'),
                 ],
                 horizontal=True,
                 flush=True,
