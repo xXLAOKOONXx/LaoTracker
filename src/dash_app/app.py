@@ -1,4 +1,4 @@
-from ctypes import wintypes
+from turtle import color
 from dash import Dash, html, dcc, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
 import cassiopeia as cass
@@ -8,10 +8,12 @@ import plotly.express as ex
 import datetime
 import pandas as pd
 import pickle
+import plotly.graph_objs as go
 
 #import lao_tracker.configure_cass
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+lp_data_file = 'data/lp.file'
 
 data_table_file = 'data/df.file'
 
@@ -72,6 +74,7 @@ app.layout = html.Div(children=[
     html.Div(id='refresh-msg', style={'color':'white', 'margin':'1rem'}),
     dbc.Card(dash_table.DataTable(id='df-table'),
     style={'width':'50rem', 'margin':'1rem'}),
+    dbc.Card(dcc.Graph(id='lp-graph'), class_name='lp-graph'),
     html.Div(id='recent-match-list'),
 ], 
 className='bg-image'
@@ -82,10 +85,23 @@ className='bg-image'
     Output('df-table', 'data'),
     Output('df-table', 'columns'),
     Output('recent-match-list', 'children'),
+    Output('lp-graph', 'figure'),
     Input('refresh-val', 'n_clicks'),
 )
 def refresh_data(n_clicks):
 
+    try:
+        with open(lp_data_file, 'rb') as f:
+            lp_df = pickle.load(f)
+    except IOError:
+        print("No LP File!")
+
+    lp_fig = go.Figure(data=[go.Scatter(x=lp_df['Timestemp'], y=lp_df['comulatedLP'], line=dict(color='#1de9b6'))], layout={
+            'title': 'LP Graph'
+        } )
+    lp_fig.update_layout(plot_bgcolor='rgba(100,100,100,256)', paper_bgcolor='rgba(0,0,0,0)')
+    lp_fig.update_xaxes(gridcolor='rgba(0,0,0,0)')
+    
 
     recent_match_list_children = ''
 
@@ -181,7 +197,7 @@ def refresh_data(n_clicks):
 
     recent_match_list_children = childs
 
-    return msg, table_df.to_dict('Records'), None, recent_match_list_children
+    return msg, table_df.to_dict('Records'), None, recent_match_list_children, lp_fig
 
 
 server = app.server

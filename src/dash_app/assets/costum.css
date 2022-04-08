@@ -40,4 +40,11 @@ h1 {
 
 .card {
     border-width: 0;
+    background-color: #78909c;
+}
+
+.lp-graph {
+    width: 60%;
+    margin: 1rem;
+    background-color: #78909c;
 }
