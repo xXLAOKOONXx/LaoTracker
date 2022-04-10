@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from dash import Dash, html, dcc, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
 import cassiopeia as cass
@@ -87,8 +88,9 @@ app.layout = html.Div(children=[
 
     dbc.Button('Refresh page', id='refresh-val', n_clicks=0, style={'margin':'2rem'}),
     html.Div(id='df-table-cards'),
-    dbc.Card(dcc.Graph(id='lp-graph'), class_name='lp-graph'),
     html.Div(id='recent-match-list'),
+    dbc.Card(dcc.Graph(id='lp-graph'), class_name='lp-graph'),
+    dbc.Card(dcc.Graph(id='lp-graph-games'), class_name='lp-graph'),
 ], 
 className='bg-image'
 )
@@ -96,6 +98,7 @@ className='bg-image'
 @app.callback(
     Output('recent-match-list', 'children'),
     Output('lp-graph', 'figure'),
+    Output('lp-graph-games', 'figure'),
     Output('df-table-cards', 'children'),
     Input('refresh-val', 'n_clicks'),
 )
@@ -106,6 +109,25 @@ def refresh_data(n_clicks):
             lp_df = pickle.load(f)
     except IOError:
         print("No LP File!")
+
+
+    r_df = lp_df[~lp_df['recentGame'].isnull()]
+    registered_game_ids = []
+    rows = []
+    for _, row in r_df.iterrows():
+        if row['recentGame'] not in registered_game_ids:
+            registered_game_ids.append(row['recentGame'])
+            rows.append(row)
+            
+    newest_df = pd.DataFrame(rows)
+    print(newest_df)
+    x_arr = [i for i in range(len(newest_df))]
+
+    lp_fig_games = go.Figure(data=[go.Scatter(x=x_arr, y=newest_df['comulatedLP'], line=dict(color='#1de9b6'))], layout={
+            'title': 'LP Graph (Games)'
+        } )
+    lp_fig_games.update_layout(plot_bgcolor='rgba(100,100,100,256)', paper_bgcolor='rgba(0,0,0,0)')
+    lp_fig_games.update_xaxes(gridcolor='rgba(0,0,0,0)')
 
     lp_fig = go.Figure(data=[go.Scatter(x=lp_df['Timestemp'], y=lp_df['comulatedLP'], line=dict(color='#1de9b6'))], layout={
             'title': 'LP Graph'
@@ -203,7 +225,7 @@ def refresh_data(n_clicks):
 
     recent_match_list_children = childs
 
-    return recent_match_list_children, lp_fig, table_df_view
+    return recent_match_list_children, lp_fig, lp_fig_games, table_df_view
 
 
 server = app.server
