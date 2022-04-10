@@ -1,20 +1,8 @@
-from re import T
-from dash import Dash, html, dcc, Input, Output, State
-
-import cassiopeia as cass
-from cassiopeia.data import Queue, Position
-from cassiopeia.core import Summoner, Match
-
-import lao_tracker.configure_cass
 import pickle
 import time
-import requests
 import datetime
-
-# TODO: Check our riotwatcher instead of cassiopeia cause of lacking support
-
+import logging
 import riotwatcher
-
 import pandas as pd
 
 with open('lao_tracker/RIOT_API_KEY.txt', 'r') as file:
@@ -35,6 +23,9 @@ shoulderguards_tier_2_id = 3855
 shoulderguards_tier_3_id = 3857
 oracle_lens_id = 3364
 
+# Activate logging File
+logging.basicConfig(filename='updater.log', level=logging.DEBUG)
+
 def loop_step():
 
     rows = []
@@ -46,7 +37,7 @@ def loop_step():
             old_df = pickle.load(f)
             rows.append(old_df)
     except IOError:
-        print("No Data Table File!")
+        logging.warning('No Data Table File!')
 
 
     # Check current game against existance
@@ -89,7 +80,7 @@ def loop_step():
 
             comulated_lp = tier_points + rank_points + league_points
 
-            print(f'{summoner["name"]} is {tier} {rank} with {league_points} LP which equals a score of {comulated_lp} comulated LP')
+            logging.info(f'{summoner["name"]} is {tier} {rank} with {league_points} LP which equals a score of {comulated_lp} comulated LP')
 
     match_list = lol_api.match.matchlist_by_puuid(region='europe', puuid=summoner['puuid'], start=0, count=100, queue=420)
 
@@ -104,6 +95,7 @@ def loop_step():
         'SummonerName':summoner['name'],
         'Timestemp':datetime.datetime.now(),
         'comulatedLP':comulated_lp,
+        'recentGame':cur_match,
     }, index=[time_stemp_now])
     lp_rows.append(new_df_line)
 
@@ -112,7 +104,7 @@ def loop_step():
         with open(lp_data_file, 'rb') as f:
             lp_rows.append(pickle.load(f))
     except IOError:
-        print("No LP File!")
+        logging.warning('No LP File!')
 
     complete_df = pd.concat(lp_rows)
     
@@ -122,20 +114,11 @@ def loop_step():
 
     # if new matches exist do calcs
 
-
-
-
-    
-
+    logging.debug(f'Most recent match id: {cur_match}')
     if cur_match in old_df.index:
+        logging.info('Current match already registered in file')
         return
-
-    
-
-    print(f'There are {len(match_list)} matches in the list')
-    print(f'most recent match id: {cur_match}')
-
-    print('---')
+    logging.debug('Start calculations for match analysis')
 
     match_id = cur_match
 
@@ -249,8 +232,6 @@ def loop_step():
 
     complete_df = pd.concat(rows)
 
-    print(complete_df) 
-
     df_file_dump = open(data_table_file,'wb')
     pickle.dump(complete_df, df_file_dump)
     df_file_dump.close()
@@ -258,10 +239,14 @@ def loop_step():
     return
 
 def main_loop():
+    sleep_duration = 1800
+    logging.info(f'Main Loop started with sleep time of {sleep_duration} seconds')
 
     while(True):
+        logging.debug('Start next step')
         loop_step()
-        time.sleep(1800)
+        logging.debug(f'Step finished, sleeping for {sleep_duration}')
+        time.sleep(sleep_duration)
 
 
     return
