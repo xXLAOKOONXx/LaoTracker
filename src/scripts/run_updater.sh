@@ -7,4 +7,4 @@ poetry install
 
 
 # Start the updater
-poetry run python lao_tracker/main.py
+poetry run nohup python lao_tracker/main.py
