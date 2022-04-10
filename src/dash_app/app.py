@@ -15,6 +15,7 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 lp_data_file = 'data/lp.file'
 
 data_table_file = 'data/df.file'
+season_12_start = datetime.datetime(2022,1,7)
 
 def draw_df():
     df = pd.DataFrame()
@@ -50,7 +51,7 @@ def calculate_average(enumerable_timedeltas):
     total_time = 0
     for _, i in enumerate(enumerable_timedeltas):
         total = total + 1
-        total_time = total_time + i.total_seconds()/1E3
+        total_time = total_time + i.total_seconds()
     mean_time = int(total_time / total)
     minutes = str(int(mean_time / 60))
     if len(minutes) == 1:
@@ -61,18 +62,31 @@ def calculate_average(enumerable_timedeltas):
     r = minutes + ':' + seconds
     return r
 
+def get_card(label, value):
+    margin = '3px'
+    c = dbc.Card(
+        dbc.ListGroup(
+            [
+                dbc.ListGroupItem(label, class_name='standard-item', style={'width':'20rem'}),
+                dbc.ListGroupItem('', class_name='standard-item', style={'width':margin, 'padding':'0px', 'backgroundColor':'#00000000'}),
+                dbc.ListGroupItem(value, class_name='standard-item', style={'width':'10rem', 'text-align':'right'}),
+            ],
+            horizontal=True,
+            flush=True,
+            style={'width':'auto'}
+        ),
+        style={'margin-left': '1rem', 'margin-top':margin, 'width':'fit-content', 'backgroundColor':'#00000000'}
+    )
+    return c
+
 
 app.layout = html.Div(children=[
     html.Video(id='bgVideo',src='/assets/animated-thresh.webm',
 								autoPlay='autoPlay',loop='loop',muted='muted'),
     html.H1(children='Welcome lonely SOUL', style={'margin':'1rem'}),
 
-    dbc.Card('Here will be more content in the future', style={'width':'fit-content', 'margin':'1rem', 'padding':'0.5rem'}),
-    dbc.Button('Refresh', id='refresh-val', n_clicks=0, style={'margin':'2rem'}),
-    
-    html.Div(id='refresh-msg', style={'color':'white', 'margin':'1rem'}),
-    dbc.Card(dash_table.DataTable(id='df-table'),
-    style={'width':'50rem', 'margin':'1rem'}),
+    dbc.Button('Refresh page', id='refresh-val', n_clicks=0, style={'margin':'2rem'}),
+    html.Div(id='df-table-cards'),
     dbc.Card(dcc.Graph(id='lp-graph'), class_name='lp-graph'),
     html.Div(id='recent-match-list'),
 ], 
@@ -80,11 +94,9 @@ className='bg-image'
 )
 
 @app.callback(
-    Output('refresh-msg', 'children'),
-    Output('df-table', 'data'),
-    Output('df-table', 'columns'),
     Output('recent-match-list', 'children'),
     Output('lp-graph', 'figure'),
+    Output('df-table-cards', 'children'),
     Input('refresh-val', 'n_clicks'),
 )
 def refresh_data(n_clicks):
@@ -106,6 +118,8 @@ def refresh_data(n_clicks):
 
     df = draw_df()
 
+    df = df[df.timestamp > season_12_start]
+
     thresh_picked = 0
     first_bloods = 0
     row_count = 0
@@ -115,22 +129,15 @@ def refresh_data(n_clicks):
         if item['firstbloodParticipation']:
             first_bloods = first_bloods + 1
         row_count = row_count + 1
-
-    table_df = pd.DataFrame({
-        'Average Kills': df['kills'].mean(),
-        'Average Assists': df['assists'].mean(),
-        'Average Deaths': df['deaths'].mean(),
-        'Percentage Thresh played':thresh_picked * 100 / row_count,
-        'Percentage First Bloods':first_bloods * 100 / row_count,
-        'Average Tier 2 Upgrade':calculate_average(df['tier2Upgrade']),
-        'Average Tier 3 Upgrade':calculate_average(df['tier3Upgrade']),
-
-    }, index=['value'])
-
-    table_df = table_df.transpose()
-
-    msg = f'Last updated {str(datetime.datetime.now())}'
-    table_df=table_df.reset_index()
+        
+    table_df_view = []
+    table_df_view.append(get_card('Average Kills', '%.2f' % round(df['kills'].mean(),2)))
+    table_df_view.append(get_card('Average Deaths', '%.2f' % round(df['deaths'].mean(),2)))
+    table_df_view.append(get_card('Average Assists', '%.2f' % round(df['assists'].mean(),2)))
+    table_df_view.append(get_card('Percentage Thresh played', '%.2f' % round(thresh_picked * 100 / row_count, 2) + ' %'))
+    table_df_view.append(get_card('Percentage First Bloods', '%.2f' % round(first_bloods * 100 / row_count, 2) + ' %'))
+    table_df_view.append(get_card('Average Tier 2 Upgrade on Thresh', calculate_average(df[df.threshPicked]['tier2Upgrade'])))
+    table_df_view.append(get_card('Average Tier 3 Upgrade on Thresh', calculate_average(df[df.threshPicked]['tier3Upgrade'])))
 
     # recent matches
     df = df.sort_values(by='timestamp', ascending=False)
@@ -196,7 +203,7 @@ def refresh_data(n_clicks):
 
     recent_match_list_children = childs
 
-    return msg, table_df.to_dict('Records'), None, recent_match_list_children, lp_fig
+    return recent_match_list_children, lp_fig, table_df_view
 
 
 server = app.server
