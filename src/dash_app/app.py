@@ -129,8 +129,6 @@ def select_tab(matchlist_clicks, summary_clicks, lp_graph_clicks):
     else:
         button_id = ctx.triggered[0]['prop_id'].split('.')[0]
     
-    print(button_id)
-    
     if button_id == 'tab-matchlist-btn':
         matchlist_btn_class = btn_tab_selected_class
         summary_btn_class = btn_tab_not_selected_class
