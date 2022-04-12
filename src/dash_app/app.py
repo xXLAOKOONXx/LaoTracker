@@ -1,16 +1,12 @@
 from dash import Dash, html, dcc, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
-import cassiopeia as cass
-from cassiopeia.data import Queue, Position
-from cassiopeia.core import Summoner, Match
+import dash
 import plotly.express as ex
 import datetime
 import pandas as pd
 import pickle
 import plotly.graph_objs as go
 import logging
-
-#import lao_tracker.configure_cass
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 lp_data_file = 'data/lp.file'
@@ -87,14 +83,80 @@ app.layout = html.Div(children=[
 								autoPlay='autoPlay',loop='loop',muted='muted'),
     html.H1(children='Welcome lonely SOUL', style={'margin':'1rem'}),
 
-    dbc.Button('Refresh page', id='refresh-val', n_clicks=0, style={'margin':'2rem'}),
-    html.Div(id='df-table-cards'),
+    dbc.Button('Reload data', id='refresh-val', n_clicks=0, style={'margin':'2rem'}),
+    dbc.Button('Match History', id='tab-matchlist-btn', n_clicks=0, style={'margin':'2rem'}),
+    dbc.Button('Summary', id='tab-summary-btn', n_clicks=0, style={'margin':'2rem'}),
+    dbc.Button('LP Graph', id='tab-lp-graph-btn', n_clicks=0, style={'margin':'2rem'}),
     html.Div(id='recent-match-list'),
-    dbc.Card(dcc.Graph(id='lp-graph'), class_name='lp-graph'),
-    dbc.Card(dcc.Graph(id='lp-graph-games'), class_name='lp-graph'),
+    html.Div(id='df-table-cards'),
+    html.Div(id='lp-graph-wrapper', children=[            
+        dbc.Card(dcc.Graph(id='lp-graph'), class_name='lp-graph'),
+        dbc.Card(dcc.Graph(id='lp-graph-games'), class_name='lp-graph'),
+    ])
 ], 
 className='bg-image'
 )
+
+@app.callback(
+    [
+        Output('tab-matchlist-btn', 'class_name'),
+        Output('tab-summary-btn', 'class_name'),
+        Output('tab-lp-graph-btn', 'class_name'),
+        Output('recent-match-list', 'className'),
+        Output('df-table-cards', 'className'),
+        Output('lp-graph-wrapper', 'className'),
+    ],
+    [
+        Input('tab-matchlist-btn', 'n_clicks'),
+        Input('tab-summary-btn', 'n_clicks'),
+        Input('tab-lp-graph-btn', 'n_clicks'),
+    ]
+)
+def select_tab(matchlist_clicks, summary_clicks, lp_graph_clicks):
+    btn_tab_selected_class = 'tab-btn-selected tab-btn'
+    btn_tab_not_selected_class = 'tab-btn-not-selected tab-btn'
+    matchlist_btn_class = btn_tab_selected_class
+    summary_btn_class = btn_tab_not_selected_class
+    lp_graph_btn_class = btn_tab_not_selected_class
+    matchlist_tab_class = 'd-block'
+    summary_tab_class = 'd-none'
+    lp_graph_tab_class = 'd-none'
+    
+    ctx = dash.callback_context
+
+    if not ctx.triggered:
+        button_id = 'No clicks yet'
+    else:
+        button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    
+    print(button_id)
+    
+    if button_id == 'tab-matchlist-btn':
+        matchlist_btn_class = btn_tab_selected_class
+        summary_btn_class = btn_tab_not_selected_class
+        lp_graph_btn_class = btn_tab_not_selected_class
+        matchlist_tab_class = 'd-block'
+        summary_tab_class = 'd-none'
+        lp_graph_tab_class = 'd-none'
+
+    if button_id == 'tab-summary-btn':
+        matchlist_btn_class = btn_tab_not_selected_class
+        summary_btn_class = btn_tab_selected_class
+        lp_graph_btn_class = btn_tab_not_selected_class
+        matchlist_tab_class = 'd-none'
+        summary_tab_class = 'd-block'
+        lp_graph_tab_class = 'd-none'
+
+    if button_id == 'tab-lp-graph-btn':
+        matchlist_btn_class = btn_tab_not_selected_class
+        summary_btn_class = btn_tab_not_selected_class
+        lp_graph_btn_class = btn_tab_selected_class
+        matchlist_tab_class = 'd-none'
+        summary_tab_class = 'd-none'
+        lp_graph_tab_class = 'd-block'
+
+
+    return matchlist_btn_class, summary_btn_class, lp_graph_btn_class, matchlist_tab_class, summary_tab_class, lp_graph_tab_class
 
 @app.callback(
     Output('recent-match-list', 'children'),

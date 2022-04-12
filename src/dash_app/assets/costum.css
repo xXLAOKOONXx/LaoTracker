@@ -48,3 +48,24 @@ h1 {
     margin: 1rem;
     background-color: #78909c;
 }
+
+.tab-btn-selected, .tab-btn-selected:active, .tab-btn-selected:focus, .tab-btn-selected:hover {
+    color: black;
+    background-color: #1de9b6;
+    border: none;
+}
+
+.tab-btn:focus {
+    box-shadow: none;
+}
+
+.tab-btn:hover {
+    color: black;
+    box-shadow: 0 0 0 0.25rem rgba(35, 204, 139, 0.5);
+}
+
+.tab-btn-not-selected, .tab-btn-not-selected:active, .tab-btn-not-selected:hover, .tab-btn-not-selected:focus {
+    color: black;
+    background-color: rgba(29, 233, 182, 0.75);
+    border: none;
+}
