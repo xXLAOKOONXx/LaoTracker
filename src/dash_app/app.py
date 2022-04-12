@@ -8,6 +8,7 @@ import datetime
 import pandas as pd
 import pickle
 import plotly.graph_objs as go
+import logging
 
 #import lao_tracker.configure_cass
 
@@ -24,7 +25,7 @@ def draw_df():
         with open(data_table_file, 'rb') as f:
             df = pickle.load(f)
     except IOError:
-        print("No Data Table File!")
+        logging.warning("No Data Table File!")
 
     return df
 
@@ -79,6 +80,7 @@ def get_card(label, value):
     )
     return c
 
+app.title = 'LaoTracker'
 
 app.layout = html.Div(children=[
     html.Video(id='bgVideo',src='/assets/animated-thresh.webm',
@@ -107,7 +109,7 @@ def refresh_data(n_clicks):
         with open(lp_data_file, 'rb') as f:
             lp_df = pickle.load(f)
     except IOError:
-        print("No LP File!")
+        logging.warning("No LP File!")
 
 
     r_df = lp_df[~lp_df['recentGame'].isnull()]
@@ -119,7 +121,7 @@ def refresh_data(n_clicks):
             rows.append(row)
             
     newest_df = pd.DataFrame(rows)
-    print(newest_df)
+    newest_df = newest_df.sort_values(by='Timestemp', ascending=True)
     x_arr = [i for i in range(len(newest_df))]
 
     lp_fig_games = go.Figure(data=[go.Scatter(x=x_arr, y=newest_df['comulatedLP'], line=dict(color='#1de9b6'))], layout={
