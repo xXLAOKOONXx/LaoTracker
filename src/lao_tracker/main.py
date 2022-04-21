@@ -240,13 +240,21 @@ def loop_step():
 
 def main_loop():
     sleep_duration = 1800
+    error_sleep_duration = 600
     logging.info(f'Main Loop started with sleep time of {sleep_duration} seconds')
 
     while(True):
-        logging.debug('Start next step')
-        loop_step()
-        logging.debug(f'Step finished, sleeping for {sleep_duration}')
-        time.sleep(sleep_duration)
+        try:
+            logging.debug('Start next step')
+            loop_step()
+            logging.debug(f'Step finished, sleeping for {sleep_duration}')
+            time.sleep(sleep_duration)
+        except riotwatcher.ApiError as ex:
+            logging.critical(f'Api Error: {str(ex)}')
+            time.sleep(error_sleep_duration)
+        except Exception as ex:
+            logging.critical(f'Unhandled Error: {str(ex)}')
+            time.sleep(error_sleep_duration)
 
 
     return
