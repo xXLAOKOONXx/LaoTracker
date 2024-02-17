@@ -1,6 +1,10 @@
 # LaoTracker
 This project is a dash app in python using the RiotAPI to provide an overview about my accounts and my progress along those accounts.
 
+## Disclaimer
+This is a quite old repository. Most likely the APIs of Riot have changed so that this repository is no longer functional.  
+The python/dash code might still work, but I as a coding guy have improved since then and would probably suggest other ways of doing things today.
+
 ## Development
 
 ### Poetry
